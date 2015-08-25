@@ -1,9 +1,15 @@
 import unittest
 import pathlib
+import os
 
 import PIL.Image
 
 from ..core import ImageFinder, TwoPerPage, ThreePerPage, FourPerPage, ImageCountError
+
+OUTPUT_DIR = os.environ.get('IMAGE_MERGE_TEST_DIR')
+
+if OUTPUT_DIR is None:
+    OUTPUT_DIR = '/tmp/'
 
 
 class testImageFinder(unittest.TestCase):
@@ -27,19 +33,18 @@ class testImageFinder(unittest.TestCase):
 class testTwoPerPage(unittest.TestCase):
 
     IMAGE_DIR = (pathlib.Path(__file__).parent / 'images').as_posix()
-    OUTPUT_DIR = '/tmp/'
 
     def test_combine_two_per_page(self):
         image1 = ImageFinder(self.IMAGE_DIR)
         image2 = ImageFinder(self.IMAGE_DIR)
-        output = TwoPerPage(self.OUTPUT_DIR)
+        output = TwoPerPage(OUTPUT_DIR, prefix='img2-')
         output.add_image_finder(image1)
         output.add_image_finder(image2)
         output.run()
 
     def test_bad_number_of_images(self):
         image1 = ImageFinder(self.IMAGE_DIR)
-        output = TwoPerPage(self.OUTPUT_DIR)
+        output = TwoPerPage(OUTPUT_DIR, prefix='img2-')
         output.add_image_finder(image1)
         self.assertRaises(ImageCountError, output.run)
 
@@ -47,13 +52,12 @@ class testTwoPerPage(unittest.TestCase):
 class testThreePerPage(unittest.TestCase):
 
     IMAGE_DIR = (pathlib.Path(__file__).parent / 'images').as_posix()
-    OUTPUT_DIR = '/tmp/'
 
     def test_combine_three_per_page(self):
         image1 = ImageFinder(self.IMAGE_DIR)
         image2 = ImageFinder(self.IMAGE_DIR)
         image3 = ImageFinder(self.IMAGE_DIR)
-        output = ThreePerPage(self.OUTPUT_DIR, prefix='img3-')
+        output = ThreePerPage(OUTPUT_DIR, prefix='img3-')
         output.add_image_finder(image1)
         output.add_image_finder(image2)
         output.add_image_finder(image3)
@@ -61,7 +65,7 @@ class testThreePerPage(unittest.TestCase):
 
     def test_bad_number_of_images(self):
         image1 = ImageFinder(self.IMAGE_DIR)
-        output = ThreePerPage(self.OUTPUT_DIR, prefix='img3-')
+        output = ThreePerPage(OUTPUT_DIR, prefix='img3-')
         output.add_image_finder(image1)
         self.assertRaises(ImageCountError, output.run)
 
@@ -69,7 +73,6 @@ class testThreePerPage(unittest.TestCase):
 class testFourPerPage(unittest.TestCase):
 
     IMAGE_DIR = (pathlib.Path(__file__).parent / 'images').as_posix()
-    OUTPUT_DIR = '/tmp/'
 
     def test_combine_four_per_page(self):
         image1 = ImageFinder(self.IMAGE_DIR)
@@ -77,7 +80,7 @@ class testFourPerPage(unittest.TestCase):
         image3 = ImageFinder(self.IMAGE_DIR)
         image4 = ImageFinder(self.IMAGE_DIR)
 
-        output = FourPerPage(self.OUTPUT_DIR, prefix='img4-')
+        output = FourPerPage(OUTPUT_DIR, prefix='img4-')
         output.add_image_finder(image1)
         output.add_image_finder(image2)
         output.add_image_finder(image3)
@@ -87,7 +90,7 @@ class testFourPerPage(unittest.TestCase):
 
     def test_bad_number_of_images(self):
         image1 = ImageFinder(self.IMAGE_DIR)
-        output = FourPerPage(self.OUTPUT_DIR, prefix='img4-')
+        output = FourPerPage(OUTPUT_DIR, prefix='img4-')
         output.add_image_finder(image1)
         self.assertRaises(ImageCountError, output.run)
 

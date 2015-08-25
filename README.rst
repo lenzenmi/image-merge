@@ -27,6 +27,8 @@ Usage
 
 Testing
 -------
+test images are created and saved to ``/tmp/img#-0001.img`` where ``#`` is the number of images per page. 
+
 #. install py.test:
     
     .. code:: bash
@@ -38,6 +40,20 @@ Testing
     .. code:: bash
     
         py.test
+        
+If you need to change the output directory, set the environment variable ``IMAGE_MERGE_TEST_DIR`` to the directory you want.
+
+For example:
+    .. code:: bash
+        
+        export IMAGE_MERGE_TEST_DIR="/home/username/my-dir/"    
+        py.test
+    
+    or
+    
+    .. code:: bash
+        
+        IMAGE_MERGE_TEST_DIR="/home/username/my-dir/" py.test     
 
 
 
