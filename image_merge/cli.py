@@ -12,13 +12,16 @@ def run(args):
 
     print()
     print('-' * 50)
-    print('Found {} photos in directory'.format(image_finder.image_count))
+    print('Found {} photo(s) in \'{}\''.format(
+        image_finder.image_count,
+        os.path.abspath(os.path.expanduser(args.source))
+    ))
     print('-' * 50)
 
     per_page = PER_PAGE[args.count - 2]
     dest = os.path.abspath(os.path.expanduser(args.dest))
     if os.path.exists(dest) and not os.path.isdir(dest):
-        print('dest is not a folder')
+        print('\'{}\' exists, but is not a folder'.format(dest))
     elif not os.path.exists(dest):
         print('Making output directory: \'{}\''.format(dest))
         os.makedirs(dest, exist_ok=True)
