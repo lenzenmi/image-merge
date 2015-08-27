@@ -62,11 +62,13 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description='Combines multiple images into one for printing',
                                      prog='image-parser')
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--count', '-c', type=int, choices=[2, 3, 4],
-                       help='how many images per page')
-    group.add_argument('--max-height',
-                       help='maximum height in centimeters')
+    group_required = parser.add_argument_group(description='Modes:')
+    group_mex = group_required.add_mutually_exclusive_group(required=True)
+    group_mex.add_argument('--count', '-c', metavar='N', type=int, choices=[2, 3, 4],
+                           help='layout that combines N images at a time')
+    group_mex.add_argument('--max-height',
+                           help='horizontal layout that resizes each image to MAX_HEIGHT centimeters '
+                                'before combining')
     parser.add_argument('source', help='path to the source files')
     parser.add_argument('dest', help='path where the final images will be saved')
     parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
