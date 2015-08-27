@@ -46,7 +46,7 @@ class testTwoPerPage(unittest.TestCase):
         image1 = ImageFinder(self.IMAGE_DIR)
         output = TwoPerPage(OUTPUT_DIR, prefix='img2-')
         output.add_image_finder(image1)
-        self.assertRaises(ImageCountError, output.run)
+        self.assertRaises(ImageCountError, output.verify)
 
 
 class testThreePerPage(unittest.TestCase):
@@ -67,7 +67,7 @@ class testThreePerPage(unittest.TestCase):
         image1 = ImageFinder(self.IMAGE_DIR)
         output = ThreePerPage(OUTPUT_DIR, prefix='img3-')
         output.add_image_finder(image1)
-        self.assertRaises(ImageCountError, output.run)
+        self.assertRaises(ImageCountError, output.verify)
 
 
 class testFourPerPage(unittest.TestCase):
@@ -92,7 +92,7 @@ class testFourPerPage(unittest.TestCase):
         image1 = ImageFinder(self.IMAGE_DIR)
         output = FourPerPage(OUTPUT_DIR, prefix='img4-')
         output.add_image_finder(image1)
-        self.assertRaises(ImageCountError, output.run)
+        self.assertRaises(ImageCountError, output.verify)
 
 if __name__ == '__main__':
     unittest.main()

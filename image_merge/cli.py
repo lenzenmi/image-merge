@@ -29,6 +29,7 @@ def run(args):
     print()
     print('running...')
     try:
+        output.verify()
         output.run()
     except ImageCountError as e:
         print()
@@ -40,7 +41,7 @@ def run(args):
         if not yes_or_no.lower().startswith('y'):
             exit(1)
         else:
-            output.run(verify=False)
+            output.run()
 
     except Exception as e:
         print()

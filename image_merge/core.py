@@ -111,17 +111,21 @@ class BaseOutputImage:
         '''
         self.images.append(image_finder)
 
-    def run(self, verify=True):
+    def verify(self):
         '''
-        Combines images into single pages.
-
-        :param bool verify: if ``True`` will raise ``ImageCountError`` if the number of added images
-        is not a multiple of ``IMAGES_PER_PAGE``
+        Verifies that the number of loaded images is a multiple of ``IMAGES_PER_PAGE``
 
         :raises: ImageCountError
         '''
-        if verify:
-            self._verify_image_count()
+        input_count = sum([img.image_count for img in self.images])
+        if not input_count % self.IMAGES_PER_PAGE == 0:
+            raise ImageCountError("{} is not a multiple of {}".format(input_count,
+                                                                      self.IMAGES_PER_PAGE))
+
+    def run(self):
+        '''
+        Combines images into single pages.
+        '''
         self.setup_page()
         input_images = [None for _ in range(self.IMAGES_PER_PAGE)]
 
@@ -190,12 +194,6 @@ class BaseOutputImage:
         image.thumbnail((self.BOX_WIDTH, self.BOX_HEIGHT), Image.LANCZOS)
 
         return image
-
-    def _verify_image_count(self):
-        input_count = sum([img.image_count for img in self.images])
-        if not input_count % self.IMAGES_PER_PAGE == 0:
-            raise ImageCountError("{} is not a multiple of {}".format(input_count,
-                                                                      self.IMAGES_PER_PAGE))
 
     def _centre_image(self, image, box):
         x, y = image.size
