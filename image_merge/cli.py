@@ -1,7 +1,8 @@
 import argparse
 import os.path
 
-from .core import ImageFinder, TwoPerPage, ThreePerPage, FourPerPage, ImageCountError
+from .core import (ImageFinder, TwoPerPage, ThreePerPage, FourPerPage, MaxHeightLandscape,
+                   ImageCountError)
 
 
 PER_PAGE = [TwoPerPage, ThreePerPage, FourPerPage]
@@ -17,16 +18,19 @@ def run(args):
         os.path.abspath(os.path.expanduser(args.source))
     ))
     print('-' * 50)
-
-    per_page = PER_PAGE[args.count - 2]
     dest = os.path.abspath(os.path.expanduser(args.dest))
     if os.path.exists(dest) and not os.path.isdir(dest):
         print('\'{}\' exists, but is not a folder'.format(dest))
+        exit(1)
     elif not os.path.exists(dest):
         print('Making output directory: \'{}\''.format(dest))
         os.makedirs(dest, exist_ok=True)
 
-    output = per_page(dest)
+    if args.count:
+        output = PER_PAGE[args.count - 2](dest)
+    elif args.max_height:
+        output = MaxHeightLandscape(dest, args.max_height)
+
     output.add_image_finder(image_finder)
 
     print()
@@ -52,13 +56,17 @@ def run(args):
         print('-' * 50)
         print(e)
         print()
+        exit(1)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Combines multiple images into one for printing',
                                      prog='image-parser')
-    parser.add_argument('--count', '-c', type=int, choices=[2, 3, 4], required=True,
-                        help='how many images per page')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--count', '-c', type=int, choices=[2, 3, 4],
+                       help='how many images per page')
+    group.add_argument('--max-height',
+                       help='maximum height in centimeters')
     parser.add_argument('source', help='path to the source files')
     parser.add_argument('dest', help='path where the final images will be saved')
     parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')

@@ -2,14 +2,22 @@
 README
 ======
 
-``image-merge`` is a command line program that merges 2, 3, or 4 images into a single image suitable for printing. 
+``image-merge`` is a command line program that merges multiple images using a variety of template options.
 
 Features
 --------
 
 * outputs standard 4" X 6" (300dpi) jpeg images for printing
-* combines 2, 3, or 4 source images into each page
 * automatically rotates and re-sizes images to fit
+
+
+Layouts
+-------
+
+Landscape
+~~~~~~~~~
+* combines 2, 3, or 4 source images
+* combines images by setting a maximum height in cm
 
 Installation
 ------------

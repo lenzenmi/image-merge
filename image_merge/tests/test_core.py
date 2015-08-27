@@ -4,7 +4,8 @@ import os
 
 import PIL.Image
 
-from ..core import ImageFinder, TwoPerPage, ThreePerPage, FourPerPage, ImageCountError
+from ..core import (ImageFinder, TwoPerPage, ThreePerPage, FourPerPage, MaxHeightLandscape,
+                    ImageCountError, ImageSizeError)
 
 OUTPUT_DIR = os.environ.get('IMAGE_MERGE_TEST_DIR')
 
@@ -93,6 +94,27 @@ class testFourPerPage(unittest.TestCase):
         output = FourPerPage(OUTPUT_DIR, prefix='img4-')
         output.add_image_finder(image1)
         self.assertRaises(ImageCountError, output.verify)
+
+
+class testMaxHeightLandscape(unittest.TestCase):
+
+    IMAGE_DIR = (pathlib.Path(__file__).parent / 'images').as_posix()
+
+    def test_combine_four_per_page(self):
+        image1 = ImageFinder(self.IMAGE_DIR)
+        image2 = ImageFinder(self.IMAGE_DIR)
+        image3 = ImageFinder(self.IMAGE_DIR)
+        image4 = ImageFinder(self.IMAGE_DIR)
+
+        output = MaxHeightLandscape(OUTPUT_DIR, max_height=5, prefix='img_max5-')
+        output.add_image_finder((image1, image2, image3, image4))
+        output.run()
+
+    def test_bad_number_of_images(self):
+        image1 = ImageFinder(self.IMAGE_DIR)
+        output = MaxHeightLandscape(OUTPUT_DIR, max_height='10', prefix='img_max10-')
+        output.add_image_finder(image1)
+        self.assertRaises(ImageSizeError, output.verify)
 
 if __name__ == '__main__':
     unittest.main()

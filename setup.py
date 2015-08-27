@@ -5,8 +5,7 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-long_description = ('A command line program that merges 2, 3, or 4 images into a single '
-                    'image suitable for printing.')
+long_description = ('A command line program that combines images using a variety of layouts')
 
 setup(
     name='image-merge',
@@ -16,7 +15,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Combines multiple images into one image',
+    description='Combines multiple images using a variety of layouts',
     long_description=long_description,
 
     # The project's main homepage.

@@ -1,11 +1,20 @@
 import pathlib
 import os.path
 import math
+import decimal
 
 from PIL import Image
 
 
-class ImageCountError(Exception):
+class ImageMergeError(Exception):
+    pass
+
+
+class ImageCountError(ImageMergeError):
+    pass
+
+
+class ImageSizeError(ImageMergeError):
     pass
 
 
@@ -107,9 +116,12 @@ class BaseOutputImage:
         '''
         Add input images to be transformed. Can be called multiple times to add additional images.
 
-        :param image_finder: Expects an initiated ``image finder class``
+        :param image_finder: Expects an initiated ``ImageFinder`` or list/tuple of ``ImageFinder``s
         '''
-        self.images.append(image_finder)
+        if isinstance(image_finder, (list, tuple)):
+            self.images.extend(image_finder)
+        else:
+            self.images.append(image_finder)
 
     def verify(self):
         '''
@@ -272,3 +284,83 @@ class FourPerPage(BaseOutputImage):
         self.BOX_THREE = (self.border, 2 * self.border + self.BOX_HEIGHT)
         self.BOX_FOUR = (2 * self.border + self.BOX_WIDTH, 2 * self.border + self.BOX_HEIGHT)
         self.BOXES = [self.BOX_ONE, self.BOX_TWO, self.BOX_THREE, self.BOX_FOUR]
+
+
+class MaxHeightLandscape(BaseOutputImage):
+    def __init__(self, path, max_height, **kwargs):
+        '''
+        max_height is the maximum image height in cm
+        '''
+        super(MaxHeightLandscape, self).__init__(path, **kwargs)
+        pixels_per_inch = self.dpi[1]
+        inches_per_cm = decimal.Decimal(1) / decimal.Decimal('2.54')
+        # convert max_height into pixels
+        self.max_height = decimal.Decimal(max_height) * inches_per_cm * pixels_per_inch
+
+    def verify(self):
+        '''
+        Checks to make sure the maximum image height is less than the output image height
+
+        :raises: ImageSizeError
+        '''
+        img_height = self.max_height + (2 * self.border)
+        if img_height > self.height:
+            raise ImageSizeError('max-height is larger than the paper size')
+
+    def setup_page(self, horizontal_offset=0):
+        self.BOX_WIDTH = (self.width - horizontal_offset) - (2 * self.border)
+        self.BOX_HEIGHT = (self.max_height)
+        self.BOX = ((self.border + horizontal_offset), self.border)
+
+    def run(self):
+        '''
+        Resizes to images to a maximum height. Tries to fit multiple images per page.
+        '''
+        horizontal_offset = 0
+        self.setup_page(horizontal_offset)
+        self._new_page()
+
+        while self.images:
+            image_finder = self.images.pop()
+            for image in image_finder:
+                transformed_image = self._transform(image)
+                horizontal_offset = horizontal_offset + self.border + transformed_image.size[0]
+                if horizontal_offset > (self.width - self.border):
+                    self._save()
+                    self.image.close()
+                    horizontal_offset = 0
+                    self.setup_page(horizontal_offset)
+                    self._new_page()
+                self.image.paste(transformed_image, self._centre_image(transformed_image, self.BOX))
+                self.setup_page(horizontal_offset)
+
+        self._save()
+        self.image.close()
+
+    def _transform(self, image):
+
+        x, y = image.size
+
+        # if it's the right size, we are done
+        if y == self.BOX_HEIGHT:
+            return image
+
+        # enlarge if too small
+        if (y < self.BOX_HEIGHT):
+            y_ratio = self.BOX_HEIGHT / y
+            new_x = math.ceil(x * y_ratio)
+            new_y = math.ceil(y * y_ratio)
+            image = image.resize((new_x, new_y), Image.LANCZOS)
+
+        # shrink if too large
+        image.thumbnail(((self.width - 2 * self.border), self.BOX_HEIGHT), Image.LANCZOS)
+
+        return image
+
+    def _centre_image(self, image, box):
+        _, y = image.size
+
+        delta_x = 0  # only center vertically
+        delta_y = (self.height - (2 * self.border) - y) // 2
+
+        return (box[0] + delta_x, box[1] + delta_y)
