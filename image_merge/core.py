@@ -324,14 +324,16 @@ class MaxHeightLandscape(BaseOutputImage):
             image_finder = self.images.pop()
             for image in image_finder:
                 transformed_image = self._transform(image)
-                horizontal_offset = horizontal_offset + self.border + transformed_image.size[0]
-                if horizontal_offset > (self.width - self.border):
+                transformed_image_width = transformed_image.size[0]
+                if self.BOX_WIDTH < transformed_image_width:
+                    # start a new page
                     self._save()
                     self.image.close()
                     horizontal_offset = 0
                     self.setup_page(horizontal_offset)
                     self._new_page()
                 self.image.paste(transformed_image, self._centre_image(transformed_image, self.BOX))
+                horizontal_offset = horizontal_offset + self.border + transformed_image_width
                 self.setup_page(horizontal_offset)
 
         self._save()
@@ -353,7 +355,7 @@ class MaxHeightLandscape(BaseOutputImage):
             image = image.resize((new_x, new_y), Image.LANCZOS)
 
         # shrink if too large
-        image.thumbnail(((self.width - 2 * self.border), self.BOX_HEIGHT), Image.LANCZOS)
+        image.thumbnail((self.width - 2 * self.border, self.BOX_HEIGHT), Image.LANCZOS)
 
         return image
 
